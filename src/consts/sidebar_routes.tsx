@@ -2,32 +2,38 @@ import { BiLogosMongodb } from "solid-icons/bi";
 import { BsFiletypeCsv, BsTerminal } from "solid-icons/bs";
 import { SiMariadb, SiPostgresql } from "solid-icons/si";
 import { SidebarRoute } from "../types/component_types";
+import { lazy } from "solid-js";
 
 let SIDEBAR_ROUTES: SidebarRoute[] = [
   {
     nome: "Json2Mongo",
-    href: "#",
-    icon: () => <BiLogosMongodb size={32} />
+    href: "/Json2Mongo",
+    icon: () => <BiLogosMongodb size={32} />,
+    component: lazy(() => import("../screens/Json2Mongo.tsx"))
   },
   {
     nome: "Mongo2Postgres",
-    href: "#",
-    icon: () => <SiPostgresql size={32} />
+    href: "/Mongo2Postgres",
+    icon: () => <SiPostgresql size={32} />,
+    component: lazy(() => import("../screens/Mongo2Postgres.tsx"))
   },
   {
     nome: "Csv Converter",
-    href: "#",
-    icon: () => <BsFiletypeCsv size={32} />
+    href: "/Csv Converter",
+    icon: () => <BsFiletypeCsv size={32} />,
+    component: lazy(() => import("../screens/CsvConverter.tsx"))
   },
   {
     nome: "Mysql/Mariadb Converter",
-    href: "#",
-    icon: () => <SiMariadb size={32} />
+    href: "/Mysql-Mariadb-Converter",
+    icon: () => <SiMariadb size={32} />,
+    component: lazy(() => import("../screens/MariadbMysqlConverter.tsx"))
   },
   {
     nome: "Scripts",
-    href: "#",
-    icon: () => <BsTerminal size={32} />
+    href: "/Scripts",
+    icon: () => <BsTerminal size={32} />,
+    component: lazy(() => import("../screens/Scripts.tsx"))
   },
 
 ]
