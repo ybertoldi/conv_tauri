@@ -3,14 +3,12 @@ export function MongoForm() {
     <form class="border-2 rounded-md p-5" >
       <h2 class="text-base/9 font-semibold ">Configurações MongoDb</h2>
 
-      <div class="mt-5 grid gap-x-6">
-        <div class="sm:col-span-4">
+      <div class="mt-5 grid grid-cols-6">
+        <div class="sm:col-span-6">
           <label for="mongo_url" class="block text-sm/6 font-medium text-black">url</label>
-          <div>
-            <div class="flex items-center gap-x-6 rounded-md  ">
-              <input type="text" class=" outline-1 block bg-gray-200 outline-black/10 grow py-2 pr-3 pl-1 text-base text-black focus:outline-none sm:text-sm/6" />
-              <button class="rounded-md bg-indigo-500 px-10 py-2 text-sm font-semibold text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Conectar</button>
-            </div>
+          <div class="flex items-center gap-x-6 ">
+            <input type="text" class=" outline-1 rounded-md block bg-gray-200 outline-black/10 grow py-2 pr-3 pl-1 text-base text-black focus:outline-none sm:text-sm/6" />
+            <button class="rounded-md bg-indigo-500 px-10 py-2 text-sm font-semibold text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Conectar</button>
           </div>
         </div>
       </div>
@@ -45,14 +43,14 @@ export function MongoForm() {
             </div>
           </div>
 
-
-          <div class="sm:col-span-2">
+          <div class="sm:col-span-3">
             <label for="postal-code" class="block text-sm/6 font-medium text-black">Database</label>
             <div class="flex mt-2 gap-x-6 ">
               <input id="postal-code" type="text" name="postal-code" autocomplete="postal-code" class="block w-full rounded-md bg-black/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-black/10 placeholder:text-blue-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
               <button class="rounded-md bg-indigo-500  px-3 py-2 text-sm font-semibold text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">+</button>
             </div>
           </div>
+
         </div>
       </div>
     </form>
