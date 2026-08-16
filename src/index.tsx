@@ -5,11 +5,11 @@ import "./index.css"
 import { Route, Router } from "@solidjs/router";
 import SIDEBAR_ROUTES from "./consts/sidebar_routes";
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-  });
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//   document.addEventListener('contextmenu', (e) => {
+//     e.preventDefault();
+//   });
+// });
 
 render(() => (
   <Router root={App}>
