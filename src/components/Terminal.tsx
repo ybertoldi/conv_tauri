@@ -18,14 +18,15 @@ export function Terminal(props: { logs: string[] }) {
   });
 
   return (
-    <div class="h-full bg-gray-950 rounded-xl shadow-sm overflow-hidden border border-gray-800 flex flex-col">
+    <div class="h-full bg-gray-950 rounded-xl shadow-sm overflow-hidden border border-gray-800 flex flex-col scrollbar-none ">
       <div class="flex items-center gap-2 px-3 py-2 border-b border-gray-800 bg-gray-900/50 shrink-0">
         <FaSolidTerminal size={11} class="text-gray-400" />
         <span class="text-xs font-medium text-gray-300">Console</span>
       </div>
+
       <div
         ref={consoleRef}
-        class="flex-1 min-h-0 overflow-y-auto px-3 py-2 font-mono text-xs text-gray-300 whitespace-pre-wrap leading-relaxed"
+        class="flex-1 min-h-0 overflow-y-auto px-3 py-2 font-mono text-xs text-gray-300 whitespace-pre-wrap leading-relaxed scrollbar-none"
       >
         <Show
           when={props.logs.length > 0}
@@ -37,13 +38,14 @@ export function Terminal(props: { logs: string[] }) {
         >
           <For each={props.logs}>
             {(log) => (
-              <div class={`mb-1.5 ${log.startsWith("$") ? "text-emerald-400" : ""}`}>
+              <div class={`p-1.5 border-b selection:bg-gray-800 hover:bg-slate-950 border-gray-900 ${log.startsWith("$") ? "text-emerald-400" : ""}`}>
                 {log}
               </div>
             )}
           </For>
         </Show>
       </div>
+
     </div>
   );
 }

@@ -228,11 +228,13 @@ export function MongoForm(props: {
               </>
             )}
           </props.form.Field>
+
           <Show when={props.isSuccess}>
             <p class="mt-1 text-xs text-emerald-600 flex items-center gap-1">
               <FaSolidCircleCheck size={11} /> Conectado com sucesso
             </p>
           </Show>
+
           <Show when={props.isError}>
             <p class="mt-1 text-xs text-red-600 flex items-center gap-1.5">
               <FaSolidCircleXmark size={11} class="shrink-0" />
@@ -278,7 +280,6 @@ export function MongoForm(props: {
           {(field) => (
             <Field
               label="Senha"
-              type="password"
               value={field().state.value}
               onInput={field().handleChange}
               onBlur={field().handleBlur}

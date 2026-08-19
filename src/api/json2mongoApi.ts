@@ -34,8 +34,8 @@ export const json2mongoApi = {
   testMongoConnection: (uri: string) =>
     invoke<string>("test_mongo_connection", { uri }),
 
-  selectJsonDirectory: () =>
-    invoke<DirectorySelection>("select_json_directory"),
+  selectJsonDirectory: (openDir: string = "") =>
+    invoke<DirectorySelection>("select_json_directory", {openDir: openDir}),
 
   validateJsonDirectory: (path: string) =>
     invoke<DirectorySelection>("validate_json_directory", { path }),

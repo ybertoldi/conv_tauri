@@ -49,7 +49,7 @@ export function createJsonImport(getConnectionValues: () => ConnectionFormValues
   };
 
   const selectDirectory = createMutation(() => ({
-    mutationFn: json2mongoApi.selectJsonDirectory,
+    mutationFn: json2mongoApi.selectJsonDirectory(selectedPath()),
     onSuccess: applyDirectory,
   }));
 
