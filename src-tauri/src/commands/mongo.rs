@@ -84,11 +84,8 @@ fn list_json_files(path: &str) -> Result<DirectorySelection, String> {
     })
 }
 
-// `blocking_pick_folder()` opens the native OS folder picker and blocks
-// this fn until the user closes it — fine here because the fn itself is
-// `async`, so Tauri runs it off the main thread and the UI doesn't freeze.
 #[tauri::command]
-pub async fn select_json_directory(app: tauri::AppHandle) -> Result<DirectorySelection, String> {
+pub async fn select_json_directory(openDir: String, app: tauri::AppHandle) -> Result<DirectorySelection, String> {
     let dir = app
         .dialog()
         .file()
