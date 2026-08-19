@@ -1,9 +1,8 @@
 /* @refresh reload */
-import { For, render } from "solid-js/web";
+import { render } from "solid-js/web";
 import App from "./App";
 import "./index.css"
-import { Route, Router } from "@solidjs/router";
-import SIDEBAR_ROUTES from "./consts/sidebar_routes";
+import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 
 // document.addEventListener('DOMContentLoaded', () => {
 //   document.addEventListener('contextmenu', (e) => {
@@ -11,10 +10,10 @@ import SIDEBAR_ROUTES from "./consts/sidebar_routes";
 //   });
 // });
 
+const queryClient = new QueryClient();
+
 render(() => (
-  <Router root={App}>
-    <For each={SIDEBAR_ROUTES}>
-      {(route) => <Route path={route.href} component={route.component} />}
-    </For>
-  </Router>
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>
 ), document.getElementById("root") as HTMLElement);

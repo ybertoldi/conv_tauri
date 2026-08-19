@@ -1,0 +1,5 @@
+order_id,user_id,sku,quantity,total,status
+1001,1,PRD-001,2,159.8,shipped
+1002,2,PRD-003,1,129.0,pending
+1003,3,PRD-002,1,349.5,cancelled
+1004,4,PRD-004,3,569.7,shipped

@@ -1,0 +1,34 @@
+[
+  {
+    "order_id": 1001,
+    "user_id": 1,
+    "sku": "PRD-001",
+    "quantity": 2,
+    "total": 159.8,
+    "status": "shipped"
+  },
+  {
+    "order_id": 1002,
+    "user_id": 2,
+    "sku": "PRD-003",
+    "quantity": 1,
+    "total": 129.0,
+    "status": "pending"
+  },
+  {
+    "order_id": 1003,
+    "user_id": 3,
+    "sku": "PRD-002",
+    "quantity": 1,
+    "total": 349.5,
+    "status": "cancelled"
+  },
+  {
+    "order_id": 1004,
+    "user_id": 4,
+    "sku": "PRD-004",
+    "quantity": 3,
+    "total": 569.7,
+    "status": "shipped"
+  }
+]

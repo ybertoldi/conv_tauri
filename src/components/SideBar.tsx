@@ -2,54 +2,83 @@ import { FaSolidChevronLeft, FaSolidChevronRight } from "solid-icons/fa";
 import { createSignal, For, Show } from "solid-js";
 
 import SIDEBAR_ROUTES from "../consts/sidebar_routes";
+import { activeScreen, setActiveScreen } from "../state/navigation";
 
 function SideBar() {
   const [sideBarToggled, setSideBarToggled] = createSignal(true);
-  const [selected, setSelected] = createSignal(0);
 
   return (
-    <aside id="hs-sidebar-header" class={` ${sideBarToggled() ? 'w-64' : 'w-[74px]'} bg-gray-100 flex-shrink-0 sticky h-screen inset-y-0 overflow-y-auto inset-s-0 bottom-0 z-60 border-e rounded-md border-gray-300`} role="dialog" tabindex="-1" aria-label="Sidebar" >
-
-      <div class="relative flex flex-col h-full max-h-full ">
-        <header class={`p-4 flex ${sideBarToggled() ? 'justify-between' : 'justify-center'} items-center gap-x-2 border-gray-300 border-b-2 rounded-md`}>
+    <aside
+      id="hs-sidebar-header"
+      class={`${sideBarToggled() ? "w-64" : "w-[74px]"
+        } flex-shrink-0 sticky inset-y-0 bottom-0 z-60 h-screen bg-white border-r border-gray-200 transition-[width] duration-200`}
+      role="dialog"
+      tabindex="-1"
+      aria-label="Sidebar"
+    >
+      <div class="relative flex flex-col h-full">
+        <header
+          class={`h-16 shrink-0 flex ${sideBarToggled() ? "justify-between" : "justify-center"
+            } items-center gap-x-2 px-4 border-b border-gray-100`}
+        >
           <Show when={sideBarToggled()}>
-            <a class="flex-none font-semibold text-xl text-layer-foreground focus:outline-hidden focus:opacity-70 " href="#" aria-label="Brand">{sideBarToggled() ? 'Conversor' : ''}</a>
+            <span class="flex-none font-semibold text-lg text-gray-900 select-none">
+              Conversor
+            </span>
           </Show>
 
-          <div class="flex hover:bg-gray-200 w-8 h-8 items-center justify-center rounded-sm px-3 cursor-pointer" onClick={() => setSideBarToggled(!sideBarToggled())}>
-            <Show when={sideBarToggled()} fallback={<FaSolidChevronRight />}>
-              <FaSolidChevronLeft />
+          <button
+            type="button"
+            class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            onClick={() => setSideBarToggled(!sideBarToggled())}
+          >
+            <Show
+              when={sideBarToggled()}
+              fallback={<FaSolidChevronRight size={14} />}
+            >
+              <FaSolidChevronLeft size={14} />
             </Show>
-          </div>
-
+          </button>
         </header>
 
-        <nav class="h-full overflow-y-auto">
-          <div >
-            <ul class="pb-0 px-2 pt-2 w-full flex flex-col flex-wrap gap-1" >
-
-              <For each={SIDEBAR_ROUTES}>
-                {(item, id) => (
+        <nav class="flex-1 min-h-0 overflow-y-auto py-3">
+          <ul class="flex flex-col gap-1 px-3">
+            <For each={SIDEBAR_ROUTES}>
+              {(item) => {
+                const isActive = () => activeScreen() === item.id;
+                return (
                   <li>
-                    <a
-                      class={`${selected() == id() ? 'bg-slate-300' : 'hover:bg-gray-200'} gap-x-5 p-3 h-12 flex  items-center text-md rounded-sm focus:outline-hidden select-none`}
-                      href={item.href}
-                      onClick={() => setSelected(id())}
+                    <button
+                      type="button"
+                      onClick={() => setActiveScreen(item.id)}
+                      title={sideBarToggled() ? undefined : item.nome}
+                      class={`group flex items-center w-full h-11 rounded-lg text-sm font-medium transition-colors select-none ${sideBarToggled() ? "gap-3 px-3" : "justify-center"
+                        } ${isActive()
+                          ? "bg-indigo-50 text-indigo-600"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        }`}
                     >
-                      {item.icon({})}
-                      {sideBarToggled() ? item.nome : ""}
-                    </a>
+                      <span
+                        class={`flex items-center justify-center shrink-0 ${isActive()
+                            ? "text-indigo-600"
+                            : "text-gray-400 group-hover:text-gray-600"
+                          }`}
+                      >
+                        {item.icon({})}
+                      </span>
+                      <Show when={sideBarToggled()}>
+                        <span class="truncate">{item.nome}</span>
+                      </Show>
+                    </button>
                   </li>
-                )
-                }
-              </For>
-
-            </ul>
-          </div>
+                );
+              }}
+            </For>
+          </ul>
         </nav>
       </div>
-    </aside >
-  )
+    </aside>
+  );
 }
 
 export default SideBar;

@@ -1,0 +1,5 @@
+id,name,email,age,active
+1,Ana Silva,ana.silva@example.com,29,true
+2,Bruno Costa,bruno.costa@example.com,34,true
+3,Carla Souza,carla.souza@example.com,41,false
+4,Diego Pereira,diego.pereira@example.com,23,true

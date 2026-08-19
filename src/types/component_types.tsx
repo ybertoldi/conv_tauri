@@ -3,7 +3,7 @@ import { lazy } from "solid-js";
 
 export interface SidebarRoute {
   nome: string;
-  href: string;
+  id: string;
   icon: Component;
   component: ReturnType<typeof lazy>;
 }

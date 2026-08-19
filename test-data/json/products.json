@@ -1,0 +1,30 @@
+[
+  {
+    "sku": "PRD-001",
+    "name": "Wireless Mouse",
+    "price": 79.9,
+    "stock": 120,
+    "category": "electronics"
+  },
+  {
+    "sku": "PRD-002",
+    "name": "Mechanical Keyboard",
+    "price": 349.5,
+    "stock": 45,
+    "category": "electronics"
+  },
+  {
+    "sku": "PRD-003",
+    "name": "Notebook Stand",
+    "price": 129.0,
+    "stock": 80,
+    "category": "accessories"
+  },
+  {
+    "sku": "PRD-004",
+    "name": "USB-C Hub",
+    "price": 189.9,
+    "stock": 60,
+    "category": "accessories"
+  }
+]
