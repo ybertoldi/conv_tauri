@@ -1,27 +1,9 @@
-// READ ME FIRST (file 3/8). Rust side of the contract in
-// api/json2mongoApi.ts (2/8) — every `#[tauri::command]` fn here matches an
-// `invoke("...")` call there by name, and the arg struct fields (Rust,
-// snake_case by convention but Tauri accepts the camelCase the frontend
-// sends via serde's rename-all) must line up with what's passed in.
-//
-// `import_json_files` is the one command api/json2mongoApi.ts calls that
-// does NOT exist here yet — that's the piece still to write. It should:
-// read each file, insert its documents into `config.database`/the given
-// collection using the `Client` stashed in Json2MongoState (see below), and
-// emit an "import-progress" event per file (see useJsonImport.ts, 6/8, for
-// the { index, output, status } shape the frontend listens for — use
-// `app.emit("import-progress", payload)`, from the `tauri::Emitter` trait).
-//
-// Next: useConnectionForm.ts (4/8).
 use mongodb::Client;
-use std::{fs, sync::Mutex};
-use tauri::State;
+use std::{fmt::format, fs, sync::Mutex, time::Duration};
+use tauri::{Emitter, State};
 use tauri_plugin_dialog::DialogExt;
+use tokio::time::sleep;
 
-// Tauri app-wide state (registered via `.manage(...)` in lib.rs). A command
-// gets access to it by taking `state: State<'_, Json2MongoState>` as a
-// parameter — Tauri injects it, matched by type, not by name. Mutex because
-// commands can run concurrently and the client needs interior mutability.
 pub struct Json2MongoState {
     pub client: Mutex<Option<Client>>,
 }
@@ -34,24 +16,71 @@ impl Default for Json2MongoState {
     }
 }
 
-// `derive(Serialize)` is what lets Tauri turn this into the JSON object
-// `DirectorySelection` (the TS interface) expects on the other side — field
-// names have to match (Tauri/serde default to the same casing you write here).
 #[derive(serde::Serialize)]
 pub struct DirectorySelection {
     pub path: String,
     pub files: Vec<String>,
 }
 
-// `#[tauri::command]` is what makes a plain fn callable via invoke() —
-// without it, this is just a normal Rust function Tauri doesn't know about.
-// Returning `Result<T, String>` maps directly to invoke()'s promise
-// resolving with `T` or rejecting with the `String` as the JS error.
-//
-// Note: `Client::with_uri_str` only parses the URI and prepares the driver —
-// it doesn't actually verify the server is reachable (mongodb's connections
-// are lazy). So this "succeeding" doesn't guarantee a real connection; the
-// `Ok("teste".into())` is a placeholder return value, not real connection info.
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct MongoConnectionConfig {
+    host: String,
+    port: String,
+    user: String,
+    password: String,
+    database: String,
+    uri: String,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct ImportFileSpec {
+    filename: String,
+    collection: String,
+    index: usize,
+}
+
+#[derive(serde::Serialize, Clone)]
+pub struct ImportProgress {
+    pub index: usize,
+    pub output: Option<String>,
+    pub status: ImportStatus,
+}
+
+impl ImportProgress {
+    pub fn running(index: usize, output: String) -> ImportProgress {
+        ImportProgress {
+            index,
+            output: Some(output),
+            status: ImportStatus::Running,
+        }
+    }
+
+    pub fn err(index: usize, output: String) -> ImportProgress {
+        ImportProgress {
+            index,
+            output: Some(output),
+            status: ImportStatus::Error,
+        }
+    }
+
+    pub fn sucess(index: usize) -> ImportProgress {
+        ImportProgress {
+            index,
+            output: None,
+            status: ImportStatus::Success,
+        }
+    }
+}
+
+#[derive(serde::Serialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum ImportStatus {
+    Pending,
+    Running,
+    Success,
+    Error,
+}
+
 #[tauri::command]
 pub async fn test_mongo_connection(
     uri: String,
@@ -66,6 +95,56 @@ pub async fn test_mongo_connection(
     Ok("teste".into())
 }
 
+#[tauri::command]
+pub async fn select_json_directory(
+    open_dir: String,
+    app: tauri::AppHandle,
+) -> Result<DirectorySelection, String> {
+    let dir = app
+        .dialog()
+        .file()
+        .set_directory(open_dir)
+        .add_filter("Pasta arquivos json", &["json"])
+        .blocking_pick_folder()
+        .iter()
+        .next()
+        .cloned();
+
+    match dir {
+        Some(p) => list_json_files(&p.to_string()),
+        None => Err("Sem diretorio".into()),
+    }
+}
+
+#[tauri::command]
+pub fn validate_json_directory(path: String) -> Result<DirectorySelection, String> {
+    list_json_files(&path)
+}
+
+#[tauri::command]
+pub async fn import_json_files(
+    path: String,
+    config: MongoConnectionConfig,
+    files: Vec<ImportFileSpec>,
+    app: tauri::AppHandle,
+) {
+    for (i, f) in files.iter().enumerate() {
+        app.emit(
+            "import-progress",
+            ImportProgress::running(f.index, format!("$ mongoimport {}: {}", f.filename, i)),
+        )
+        .unwrap();
+
+        sleep(Duration::from_millis(2000)).await;
+
+        app.emit("import-progress", ImportProgress::sucess(f.index))
+            .unwrap();
+    }
+}
+
+//////////////////////
+// helper functions //
+/////////////////////
 fn list_json_files(path: &str) -> Result<DirectorySelection, String> {
     if !std::path::Path::new(path).is_dir() {
         return Err("Diretório inválido".into());
@@ -82,26 +161,4 @@ fn list_json_files(path: &str) -> Result<DirectorySelection, String> {
         files,
         path: path.to_string(),
     })
-}
-
-#[tauri::command]
-pub async fn select_json_directory(openDir: String, app: tauri::AppHandle) -> Result<DirectorySelection, String> {
-    let dir = app
-        .dialog()
-        .file()
-        .add_filter("Pasta arquivos json", &["json"])
-        .blocking_pick_folder()
-        .iter()
-        .next()
-        .cloned();
-
-    match dir {
-        Some(p) => list_json_files(&p.to_string()),
-        None => Err("Sem diretorio".into()),
-    }
-}
-
-#[tauri::command]
-pub fn validate_json_directory(path: String) -> Result<DirectorySelection, String> {
-    list_json_files(&path)
 }

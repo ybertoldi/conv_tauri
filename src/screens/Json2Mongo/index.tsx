@@ -53,7 +53,7 @@ const Json2Mongo = () => {
         </div>
 
         <div class="h-[280px] sm:h-auto sm:col-start-1 sm:row-start-2 sm:min-h-0">
-          <Terminal logs={Array(50).fill(["$ teste", "opa"]).flat() /*jsonImport.consoleLogs()*/} />
+          <Terminal logs={jsonImport.consoleLogs()} />
         </div>
       </div>
     </div>

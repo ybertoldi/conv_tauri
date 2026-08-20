@@ -1,0 +1,14 @@
+[cargo]
+allFeatures = false
+noDefaultFeatures = false
+targetDir = true
+
+[cargo.buildScripts]
+enable = true
+
+[check]
+command = "check"
+workspace = false
+
+[files]
+excludeDirs = ["target", "node_modules", "dist", ".git"]

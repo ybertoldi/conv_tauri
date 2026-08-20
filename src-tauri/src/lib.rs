@@ -1,6 +1,7 @@
 mod commands;
 use commands::mongo::{
-    select_json_directory, test_mongo_connection, validate_json_directory, Json2MongoState,
+    import_json_files, select_json_directory, test_mongo_connection, validate_json_directory,
+    Json2MongoState,
 };
 
 #[tauri::command]
@@ -18,7 +19,8 @@ pub fn run() {
             greet,
             test_mongo_connection,
             select_json_directory,
-            validate_json_directory
+            validate_json_directory,
+            import_json_files
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

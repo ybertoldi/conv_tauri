@@ -1,15 +1,10 @@
 import { createSignal } from "solid-js";
 import { listen } from "@tauri-apps/api/event";
 import { createMutation } from "@tanstack/solid-query";
-import { json2mongoApi, type DirectorySelection } from "../../api/json2mongoApi";
+import { ImportProgress, json2mongoApi, type DirectorySelection } from "../../api/json2mongoApi";
 import type { JsonFile } from "../../components/DirSelector";
 import type { ConnectionFormValues } from "./useConnectionForm";
 
-interface ImportProgress {
-  index: number;
-  output: string;
-  status: JsonFile["status"];
-}
 
 // READ ME FIRST (file 6/8). Owns directory selection/validation and the
 // import run itself. Three createMutation calls here are TanStack Query
@@ -49,7 +44,7 @@ export function createJsonImport(getConnectionValues: () => ConnectionFormValues
   };
 
   const selectDirectory = createMutation(() => ({
-    mutationFn: json2mongoApi.selectJsonDirectory(selectedPath()),
+    mutationFn: () => json2mongoApi.selectJsonDirectory(selectedPath()),
     onSuccess: applyDirectory,
   }));
 
@@ -65,7 +60,7 @@ export function createJsonImport(getConnectionValues: () => ConnectionFormValues
   const updateCollectionName = (index: number, value: string) => {
     setFiles((prev) =>
       prev.map((f, i) => (i === index ? { ...f, collectionName: value } : f))
-    );
+    )
   };
 
   const runImport = createMutation(() => ({
@@ -84,9 +79,12 @@ export function createJsonImport(getConnectionValues: () => ConnectionFormValues
       // is important: without calling it, this closure (and its captured
       // `setFiles`/`setConsoleLogs`) would keep listening forever, firing on
       // every future import run too, not just this one.
-      const unlisten = await listen<ImportProgress>("import-progress", (event) => {
+      const unlisten = await json2mongoApi.listenImportProgress((event) => {
         const { index, output, status } = event.payload;
-        setConsoleLogs((prev) => [...prev, output]);
+        if (output) {
+          setConsoleLogs((prev) => [...prev, output]);
+        }
+
         setFiles((prev) =>
           prev.map((f, i) => (i === index ? { ...f, status } : f))
         );

@@ -9,6 +9,8 @@
 //
 // Next: src-tauri/src/commands/mongo.rs (3/8) to see these implemented.
 import { invoke } from "@tauri-apps/api/core";
+import { JsonFile } from "../components/DirSelector";
+import { EventCallback, listen } from "@tauri-apps/api/event";
 
 export interface DirectorySelection {
   path: string;
@@ -30,16 +32,25 @@ export interface ImportFileSpec {
   index: number;
 }
 
+export interface ImportProgress {
+  index: number;
+  output: string | null;
+  status: JsonFile["status"];
+}
+
 export const json2mongoApi = {
   testMongoConnection: (uri: string) =>
     invoke<string>("test_mongo_connection", { uri }),
 
   selectJsonDirectory: (openDir: string = "") =>
-    invoke<DirectorySelection>("select_json_directory", {openDir: openDir}),
+    invoke<DirectorySelection>("select_json_directory", { openDir: openDir }),
 
   validateJsonDirectory: (path: string) =>
     invoke<DirectorySelection>("validate_json_directory", { path }),
 
   importJsonFiles: (path: string, config: MongoConnectionConfig, files: ImportFileSpec[]) =>
     invoke<void>("import_json_files", { path, config, files }),
+
+
+  listenImportProgress: (fn: EventCallback<ImportProgress>) => listen<ImportProgress>("import-progress", fn),
 };
