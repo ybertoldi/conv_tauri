@@ -32,7 +32,7 @@ pub struct MongoConnectionConfig {
     uri: String,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct ImportFileSpec {
     filename: String,
     collection: String,
@@ -47,6 +47,14 @@ pub struct ImportProgress {
 }
 
 impl ImportProgress {
+    pub fn new(index: usize, output: Option<String>, status: ImportStatus) -> Self {
+        Self {
+            index,
+            output,
+            status,
+        }
+    }
+
     pub fn running(index: usize, output: String) -> ImportProgress {
         ImportProgress {
             index,
@@ -68,6 +76,61 @@ impl ImportProgress {
             index,
             output: None,
             status: ImportStatus::Success,
+        }
+    }
+}
+
+pub struct Logger<'a> {
+    app: &'a tauri::AppHandle,
+    file: Option<ImportFileSpec>,
+    status: ImportStatus,
+}
+
+impl<'a> Logger<'a> {
+    pub fn new(app: &'a tauri::AppHandle) -> Self {
+        Self {
+            app,
+            file: None,
+            status: ImportStatus::Pending,
+        }
+    }
+
+    pub fn start(&mut self, file: &ImportFileSpec) {
+        self.file = Some(file.clone());
+        self.status = ImportStatus::Running;
+        self.update_status();
+    }
+
+    pub fn error(&mut self) {
+        self.status = ImportStatus::Error;
+        self.update_status();
+    }
+
+    pub fn end_sucess(&mut self) {
+        self.status = ImportStatus::Success;
+        self.update_status();
+
+        self.status = ImportStatus::Pending;
+        self.file = None;
+    }
+
+    pub fn log(&self, msg: &str) {
+        if let Some(file) = &self.file {
+            self.app.emit(
+                "import-progress",
+                ImportProgress::new(file.index, Some(String::from(msg)), self.status.clone()),
+            );
+        }
+    }
+
+    fn update_status(&self) {
+        if let Some(f) = &self.file {
+            self.app
+                .emit(
+                    "import-progress",
+                    ImportProgress::new(f.index, None, self.status.clone()),
+                )
+                .unwrap();
         }
     }
 }
@@ -128,17 +191,13 @@ pub async fn import_json_files(
     files: Vec<ImportFileSpec>,
     app: tauri::AppHandle,
 ) {
+    let mut logger = Logger::new(&app);
     for (i, f) in files.iter().enumerate() {
-        app.emit(
-            "import-progress",
-            ImportProgress::running(f.index, format!("$ mongoimport {}: {}", f.filename, i)),
-        )
-        .unwrap();
-
+        logger.start(f);
+        logger.log("Hello My darling...");
         sleep(Duration::from_millis(2000)).await;
-
-        app.emit("import-progress", ImportProgress::sucess(f.index))
-            .unwrap();
+        logger.log("Howdy");
+        logger.end_sucess();
     }
 }
 
