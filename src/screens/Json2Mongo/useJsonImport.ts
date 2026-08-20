@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { listen } from "@tauri-apps/api/event";
 import { createMutation } from "@tanstack/solid-query";
 import { ImportProgress, json2mongoApi, type DirectorySelection } from "../../api/json2mongoApi";
@@ -23,9 +23,15 @@ import type { ConnectionFormValues } from "./useConnectionForm";
 // Next: components/DirSelector.tsx (7/8), which renders everything this
 // hook returns.
 export function createJsonImport(getConnectionValues: () => ConnectionFormValues) {
-  const [selectedPath, setSelectedPath] = createSignal("");
+  const [selectedPath, setSelectedPath] = createSignal(localStorage.getItem("json-dir") || "");
   const [files, setFiles] = createSignal<JsonFile[]>([]);
   const [consoleLogs, setConsoleLogs] = createSignal<string[]>([]);
+
+  createEffect(() => {
+    localStorage["json-dir"] = selectedPath();
+  });
+
+
 
   // Shared onSuccess for both selectDirectory (native folder dialog) and
   // validatePath (user typed/pasted a path and blurred the field) below —
@@ -120,6 +126,11 @@ export function createJsonImport(getConnectionValues: () => ConnectionFormValues
     if (files().length === 0 || !selectedPath()) return;
     runImport.mutate();
   };
+
+
+  if (selectedPath())
+
+    validatePath.mutate(selectedPath());
 
   return {
     selectedPath,
