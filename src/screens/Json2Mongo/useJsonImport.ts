@@ -22,15 +22,33 @@ import type { ConnectionFormValues } from "./useConnectionForm";
 //
 // Next: components/DirSelector.tsx (7/8), which renders everything this
 // hook returns.
+
+
+
+
 export function createJsonImport(getConnectionValues: () => ConnectionFormValues) {
   const [selectedPath, setSelectedPath] = createSignal(localStorage.getItem("json-dir") || "");
   const [files, setFiles] = createSignal<JsonFile[]>([]);
   const [consoleLogs, setConsoleLogs] = createSignal<string[]>([]);
 
+  // para teste
+  setFiles([
+    {
+      checked: false,
+      collectionName: "teste1",
+      name: "aa",
+      status: "pending"
+    }
+  ]);
+  // fim do teste
+
   createEffect(() => {
     localStorage["json-dir"] = selectedPath();
   });
 
+  createEffect(() => {
+    console.log(files());
+  });
 
 
   // Shared onSuccess for both selectDirectory (native folder dialog) and
@@ -68,6 +86,12 @@ export function createJsonImport(getConnectionValues: () => ConnectionFormValues
       prev.map((f, i) => (i === index ? { ...f, collectionName: value } : f))
     )
   };
+
+  const toggleCheck = (index: number) => {
+    setFiles((prev) =>
+      prev.map((f, i) => (i === index ? { ...f, checked: !f.checked } : f))
+    )
+  }
 
   const runImport = createMutation(() => ({
     mutationFn: async () => {
@@ -139,6 +163,7 @@ export function createJsonImport(getConnectionValues: () => ConnectionFormValues
     selectDirectory,
     onPathBlur,
     updateCollectionName,
+    toggleCheck,
     runImport,
     start,
   };

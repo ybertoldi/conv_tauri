@@ -1,13 +1,3 @@
-// READ ME FIRST (file 1/8). This is the screen's entry point — the "map".
-// It owns nothing itself: it just calls two hooks for state/logic and hands
-// their pieces down to three dumb, render-only components as props. That
-// split (hooks = state+logic, components = props in/JSX out) is the pattern
-// the whole feature follows — see MEMORY-less version of this comment in
-// each file for how that piece fits in.
-//
-// Where to go next: api/json2mongoApi.ts (2/8), then
-// src-tauri/src/commands/mongo.rs (3/8) — those two together are the
-// contract with Rust every hook below eventually calls into.
 import { MongoForm } from "../../components/MongoForm";
 import { DirSelector } from "../../components/DirSelector";
 import { Terminal } from "../../components/Terminal";
@@ -17,13 +7,6 @@ import { createJsonImport } from "./useJsonImport";
 export type { ConnectionFormValues, ConnectionFormApi } from "./useConnectionForm";
 
 const Json2Mongo = () => {
-  // Two independent hooks. `connectionForm` is the MongoDB connection form
-  // (host/port/user/password/database/url) — see useConnectionForm.ts (4/8).
-  // `jsonImport` is directory picking + the actual import run — see
-  // useJsonImport.ts (6/8). jsonImport needs the connection's current values
-  // only at import time, so it takes a *getter* (`() => connectionForm.state.values`)
-  // instead of depending on the whole connectionForm hook — keeps the two
-  // decoupled (jsonImport doesn't need to know how the connection form works).
   const { form: connectionForm, testConnection } = createConnectionForm("json2mongo");
   const jsonImport = createJsonImport(() => connectionForm.state.values);
 
@@ -48,6 +31,7 @@ const Json2Mongo = () => {
             onSelectDirectory={() => jsonImport.selectDirectory.mutate()}
             onPathBlur={jsonImport.onPathBlur}
             onUpdateCollectionName={jsonImport.updateCollectionName}
+            onPushCheckbox={jsonImport.toggleCheck}
             onImport={jsonImport.start}
           />
         </div>

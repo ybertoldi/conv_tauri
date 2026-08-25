@@ -32,6 +32,7 @@ import Field from "./Field";
 //    tables instead of a combobox) — it computes rows/columns/headers for
 //    you, you render the actual <table> markup yourself with FlexRender.
 export interface JsonFile {
+  checked: boolean;
   name: string;
   collectionName: string;
   status: "pending" | "running" | "success" | "error";
@@ -76,16 +77,19 @@ function StatusBadge(props: { status: JsonFile["status"] }) {
 
 // Table model inputs (features + column helper) are kept module-level and
 // stable, per TanStack Table v9 guidance — only `data` should change.
-const fileTableFeatures = tableFeatures({});
+const fileTableFeatures = tableFeatures({
+});
 const fileColumnHelper = createColumnHelper<typeof fileTableFeatures, JsonFile>();
 
 export function DirSelector(props: {
   selectedPath: string;
   files: JsonFile[];
   isImporting: boolean;
+
   onSelectDirectory: () => void;
   onPathBlur: (path: string) => void;
   onUpdateCollectionName: (index: number, value: string) => void;
+  onPushCheckbox: (index: number) => void,
   onImport: () => void;
 }) {
   const [draftPath, setDraftPath] = createSignal("");
@@ -99,13 +103,26 @@ export function DirSelector(props: {
     };
   });
 
+  
   const fileColumns = fileColumnHelper.columns([
+    fileColumnHelper.accessor("checked", {
+      header: "Sel.",
+      cell: (info) => (
+        <div class="flex items-center justify-center">
+          <input type="checkbox" style="flex-centered" 
+            checked={info.getValue()} onchange={() => {props.onPushCheckbox(info.row.index)}}/>
+        </div>
+      ),
+      
+    }),
+
     fileColumnHelper.accessor("name", {
       header: "Arquivo",
       cell: (info) => (
         <span class="text-sm text-gray-700 font-mono">{info.getValue()}</span>
       ),
     }),
+
     fileColumnHelper.accessor("collectionName", {
       header: "Collection",
       cell: (info) => (
@@ -120,17 +137,13 @@ export function DirSelector(props: {
         />
       ),
     }),
+
     fileColumnHelper.accessor("status", {
       header: "Status",
       cell: (info) => <StatusBadge status={info.getValue()} />,
     }),
   ]);
 
-  // `get data()` (a getter, not a plain `data: props.files`) is what makes
-  // this reactive to Solid — createTable reads `.data` internally, and a
-  // getter re-runs that read every time, same reason components use
-  // `props.x` instead of destructuring it. A plain property would only
-  // ever capture whatever `props.files` was at this one call.
   const filesTable = createTable({
     features: fileTableFeatures,
     columns: fileColumns,
@@ -201,10 +214,10 @@ export function DirSelector(props: {
               <thead class="sticky top-0 bg-white">
                 <For each={filesTable.getHeaderGroups()}>
                   {(headerGroup) => (
-                    <tr class="border-b border-gray-200">
+                    <tr class="border border-gray-200">
                       <For each={headerGroup.headers}>
                         {(header) => (
-                          <th class="py-1.5 pr-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          <th class="py-1.5 pr-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wide border-l">
                             <filesTable.FlexRender header={header} />
                           </th>
                         )}
@@ -216,10 +229,10 @@ export function DirSelector(props: {
               <tbody class="divide-y divide-gray-100">
                 <For each={filesTable.getRowModel().rows}>
                   {(row) => (
-                    <tr class="hover:bg-gray-50/60 transition-colors">
+                    <tr class="hover:bg-gray-50/60 transition-colors border">
                       <For each={row.getAllCells()}>
                         {(cell) => (
-                          <td class="py-1.5 pr-3">
+                          <td class="py-1.5 pr-3 border">
                             <filesTable.FlexRender cell={cell} />
                           </td>
                         )}
